@@ -1,0 +1,6 @@
+logs
+.idea
+
+where_is_carmen/target
+where_is_carmen/dbt_packages
+where_is_carmen/logs

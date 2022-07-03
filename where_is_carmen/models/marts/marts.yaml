@@ -1,0 +1,94 @@
+version: 2
+
+models:
+  - name: person
+    description: "Person data. Contains person name and person type (agent or witness)"
+    columns:
+      - name: person_id
+        description: "Surrogate key"
+        tests:
+          - not_null
+          - unique
+
+      - name: full_name
+        description: "Person full name"
+
+      - name: person_type
+        description: "Person type: agent or witness"
+
+      - name: city_agent
+        description: "{{ doc('city_agent') }}"
+
+
+  - name: location
+    description: "Location of event"
+    columns:
+      - name: location_id
+        description: "{{ doc('location_id') }}"
+        tests:
+          - not_null
+          - unique
+
+      - name: region
+        description: "{{ doc('agency_region') }}"
+
+      - name: country
+        description: "{{ doc('country') }}"
+
+      - name: city
+        description: "{{ doc('city') }}"
+
+      - name: latitude
+        description: "{{ doc('latitude') }}"
+
+      - name: longitude
+        description: "{{ doc('longitude') }}"
+
+
+  - name: event_sighting
+    description: "Transactional table with sighting events"
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - date_witnessed
+            - location_id
+            - witness_person_id
+    columns:
+      - name: date_witnessed
+        description: "{{ doc('date_witness') }}"
+
+      - name: date_reported
+        description: "{{ doc('date_agent') }}"
+
+      - name: location_id
+        description: "{{ doc('location_id') }}"
+        tests:
+          - relationships:
+              to: ref("location")
+              field: location_id
+
+      - name: witness_person_id
+        description: "ID of event witness"
+        tests:
+          - relationships:
+              to: ref("person")
+              field: person_id
+
+      - name: agent_person_id
+        description: "ID of agent who filed report to HQ"
+        tests:
+          - relationships:
+              to: ref("person")
+              field: person_id
+
+      - name: behavior
+        description: "{{ doc('behavior') }}"
+
+      - name: has_weapon
+        description: "{{ doc('has_weapon') }}"
+
+      - name: has_hat
+        description: "Was Carmen wearing a hat?"
+
+      - name: has_jacket
+        description: "Was Carmen wearing a jacket?"

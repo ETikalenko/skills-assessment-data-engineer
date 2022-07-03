@@ -1,0 +1,40 @@
+version: 2
+
+models:
+  - name: most_likely_region_by_month
+    description: "For each month, which agency region is Carmen Sandiego most likely to be found?"
+    columns:
+      - name: month_witnessed
+        description: "Month of event"
+
+      - name: region
+        description: "Region of sightings"
+
+
+  - name: most_occuring_behavior
+    description: "What are the three most occuring behaviors of Ms. Sandiego?"
+    columns:
+      - name: behavior
+        description: "Carmen's behavior"
+
+      - name: num
+        description: "Number of occurence"
+
+
+  - name: behavior_probability_by_month
+    description: "For each month, what is the probability Ms. Sandiego exhibits one of her three most occurring behaviors?"
+    columns:
+      - name: month_witnessed
+        description: "Month of event"
+
+      - name: probability
+        description: "Probabilty of Carmen exhibits one of her three most occurring behaviors"
+
+  - name: wearing_probability_by_month
+    description: "For each month, what is the probability that Ms. Sandiego is armed AND wearing a jacket, but NOT a hat?"
+    columns:
+      - name: month_name
+        description: "Month of event"
+
+      - name: probability
+        description: "Probabilty of Carmen wearing jacket and having a weapon and not wearing a hat"

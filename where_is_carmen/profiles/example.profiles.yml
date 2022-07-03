@@ -1,0 +1,14 @@
+where_is_carmen:
+  outputs:
+
+    dev:
+      type: postgres
+      threads: 2
+      host: localhost
+      port: 5432
+      user: "{{ env_var('POSTGRES_USER') }}"
+      pass: "{{ env_var('POSTGRES_PASSWORD') }}"
+      dbname: "{{ env_var('POSTGRES_DB') }}"
+      schema: dev
+
+  target: dev

@@ -1,91 +1,85 @@
-<p align="center">
-  <img src='https://ucarecdn.com/b23cdfa3-9e8d-4799-aa9b-6c9af94f2d67/' alt="Cascade Debt" width=350px/>
-  <br><br>
-</p>
+## Task description
+Task description can be found [here](docs/README.md)
 
-# Skill Assessment: _dbt_ Data Engineer
+## Solution
+### Notes and Assumptions
+- Agents with the same name but different HQ: are they the same persons who were relocated or they are all different persons?
+For simplicity, I assume they are different persons
+- Assume that agent works only in one region and can report only to this region HQ
+- Not clear what we'll have in data and how to process cases records if, for example, two witnesses saw same Carmen appearance 
+  at the same day independently. What if they saw different appearance the same day? From data for simplicity assume that 
+  not more than one event happens on specified date 
 
-## Background
+### ERD Diagram
 
-:clap: A sincere congratulations on progressing your candidacy for the Data Engineer role at Cascade Debt! This role is a critical part of our ELT pipeline team, and will largely address transformation from client raw data models into frontend mart models. As such, we'd love for you to show off your dbt skills to us! :sunglasses: 
+- Date dimension is not implemented as it's not required for requested analytics
+- I had a doubts where to put `city_agent` field but at the end decided to add it to `person` table as it is an attribute 
+  of agent
 
-For this final assessment, please build a dbt project that addresses the problem listed below. Ensure that you have it cloned to a git-based sharable repository, and that you have a README.md file in the repository's root discussing your analysis for the problem. You may use whichever SQL database flavor you prefer (we use PostgreSQL), just state which was chosen in your README.md. 
+![img.png](docs/ERD/carmen-db-erd.png)
 
----
 
-## Problem: *Where in the World is Carmen Sandiego*? 
+### Local installation
+- Install python >= 3.8
+- Install requirements: `pip install -r requirements.txt`
+- Install Docker for your OS: https://docs.docker.com/get-docker/
+- Run Postgres in a container: `docker run --name carmen-db-container -e POSTGRES_USER=your_username -e POSTGRES_PASSWORD=your_password -p 5432:5432`
+  This will create and run a container `carmen_db_container` with specified root user and password
+- Create a database `name_of_your_db`
+- Create environment variables:
+```
+    POSTGRES_DB=<name_of_your_db>
+    POSTGRES_USER=<your_username>
+    POSTGRES_PASSWORD=<your_password>
+```
+- dbt project is located in `where_is_carmen` folder. Sub-folder `profiles` contains example file for profiles.yml.
+  If you use Postgres, copy this file into `~/.dbt/` and rename to `profiles.yml`: https://docs.getdbt.com/dbt-cli/configure-your-profile#advanced-customizing-a-profile-directory
+  Change local folder to project folder `where_is_carmen` and run `dbt_deps` to install dbt packages
+- Execute `dbt seed`, `dbt run` and then `dbt test` to run and test the whole pipeline 
 
-<table>
-  <tr>
-    <td> <img src="https://www.mobygames.com/images/covers/l/32898-where-in-the-world-is-carmen-sandiego-deluxe-edition-dos-front-cover.jpg" alt="WIWICSD" width=150px/></td>
-    <td width=450px> 
-        Some may know this <a href="https://en.wikipedia.org/wiki/Carmen_Sandiego_(video_game_series)">popular game franchise</a> in which players answer questions to solve the titular riddle. Your task today is an homage to this game! You've recently come aboard Interpol's team as a data engineer. Their dedicated data team has collected, parsed, and assembled several agent field reports over the years, but in Excel only. Their final collection is provided in the next subsection - your task is to engineer this data to provide analytical answers to the Interpol team!
-    </td>
-  </tr>
-</table>
 
----
+### Implementation
+- Python script `./utils/convert_xlsx_to_csv.py` is developed to convert Excel file into CSV. I added new column region
+  which is populated by sheet name
+- Description of second step mentions creating of eight view models on top of csv files. I decided to upload files using 
+standard functionality of dbt - `dbt seed`. Then I created one staging view `stg_carmen_sightings`. The reasons of such desicion:
+  - although dbt is tool for transformation and it is not supposed to do regular file loads in database, it could be used for one time load
+  - probably I could use `COPY FROM` statement or create external table in macro to load CSVs but it makes the process more 
+    complex and less repeatable in other databases
+  - using one staging view makes process simpler and it allows to test/validate the whole dataset before we start loading data to 
+    the next schema
+    
+![lineage_graph.png](docs/lineage_graph.png)
 
-## Data Sources & Common Model Development
+### Analytics
+1. Q: For each month, which agency region is Carmen Sandiego most likely to be found?
+   
+   A:
+   
+    ![Most likely region](docs/most_likely_region.png)
+   
 
-The data is contained in the attached Excel workbook [*carmen_sightings_20220629061307.xlsx*](https://github.com/cascadedebt/skills-assessment-data-engineer/blob/f913f119c3ab2aab4630f4ab0aecfe4d1b3f54b0/carmen_sightings_20220629061307.xlsx). Note the sheets are organized by eight (nearly continential) **regions** - there is an Interpol agency HQ in a city of each region to which the agents report. Each agency HQ uses their own language or dialect to compile their regional reports, but those reports are in [first normal form (1NF)](https://en.wikipedia.org/wiki/First_normal_form). 
+2. Q: Also for each month, what is the probability that Ms. Sandiego is armed AND wearing a jacket, but NOT a hat? 
+   What general observations about Ms. Sandiego can you make from this?
+   
+    A:
 
-> 1. _The first step of your task is to extract data from Excel workbook, treating as initial sources._
-> **HINT:** _CSV exports into `seeds` - whether by Excel or pandas - is a great way to start..._ :eyes:
+    ![Probability of wearing jacket but not hat and having a weapon](docs/wearing_probability.png)
+   
+    Observations (looking at all attributes - has_weapon, has_jacket and has_hat): hat is not that important, 
+   usually Carmen wears her red coat and usually she has no weapon
 
-As seen from the data, agencies are free to name report columns according to their custom - but let's call each "yablaka" an apple! :apple: 
-Each source ought follow a _common data dictionary_ of 
 
-| Column | Description | Type |
-| ------------ | ----------- | -----|
-| date_witness | Date of witness sighting | date |
-| witness | Name of witness sighting the perpetrator | string |
-| agent | Name of field agent filing the report | string |
-| date_agent | Date of field agent filing the report | date |
-| city_agent | HQ city where field agent files the report | string |
-| country | Country of sighting | string | 
-| city | City of sighting | string |
-| latitude | Latitude of sighting | float |
-| longitude | Longitude of sighting | float |
-| has_weapon | Was the perpetrator observed to be armed? | boolean |
-| has_hat | Was the perpetrator wearing a hat? | boolean |
-| has_jacket | Was the perpetrator wearing a jacket? | boolean |
-| behavior | Short description of perpetrator behavior | string |
+3. Q: What are the three most occuring behaviors of Ms. Sandiego?   
+   Not clear what to do if we have a tie on third place. I take first in alphabetical order (but for real tasks I would 
+   prefer to use rank function to have all rows)
+   
+    A: Three most likely behaviors: Out-of-control, Complaining, Happy
+   
 
-> 2. _The second step of your task is to create view models that columnarly maps these eight different sources, each into this common data dictionary._ 
-> **HINT:** _You can do this as you wish - via CTE stages, macros, go wild! The end result however must be a view model for each source._ 
 
-Now that you have eight models, all with the same columns - join them together, but with a caveat:
-
-> 3. _The third step of your task is to join the six different views into ONE schema that goes beyond 1NF (\[2-6\]NF, BCNF). You have a great deal of design freedom here, so get creative! Just persist final resulting schema as tables into a new schema - please present your design's entity-relation-diagram in your README.md._
-
----
-
-## Analytics
-
-* This new schema includes the >1NF model you've just developed, as tables. From this model, it ought be fairly straightforward for you to create analytical view(s) to answer the following questions:
-
-    a. For each month, which agency region is Carmen Sandiego most likely to be found? 
-
-    b. Also for each month, what is the probability that Ms. Sandiego is armed __AND__ wearing a jacket, but __NOT__ a hat? What general observations about Ms. Sandiego can you make from this? 
-
-    c. What are the three most occuring behaviors of Ms. Sandiego?
-
-    d. For each month, what is the probability Ms. Sandiego exhibits one of her three most occurring behaviors?
-
-> 4. _Create analytical views in your new schema to answer the four above questions. Document your steps and logic in your README.md._
-> **HINT:** _`dbt docs` (and its screenshots) are a great resource!_
-
----
-
-## Submission
-
->**NOTE:** Throughout, I've referenced `README.md`. If you are unfamiliar with [GitHub Markdown](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax), feel free to use your most convenient method: Word document, Google Doc, textfile (with image attachments), html - however you can best communicate your thoughts and ideas!
-
-* **Ensure that your project runs fully BEFORE submission!** 
-
-* Verify that you have the f analytical questions answered in your README.md, and you are confident with your presentation. 
-
-* Push and merge into your git repository's main branch. 
-
-* Submit your project's git repository URL to either the Rippling comms channel or via email to `joshua@cascadedebt.com`.
+4. Q: For each month, what is the probability Ms. Sandiego exhibits one of her three most occurring behaviors?
+   
+   A:
+   
+    ![Behavior probability](docs/behavior_probability.png)

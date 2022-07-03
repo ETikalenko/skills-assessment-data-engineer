@@ -1,0 +1,5 @@
+version: 2
+
+macros:
+  - name: generate_schema_name
+    description: "Use custom schema name if defined"
