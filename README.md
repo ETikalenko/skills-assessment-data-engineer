@@ -56,7 +56,9 @@ standard functionality of dbt - `dbt seed`. Then I created one staging view `stg
   - currently python scrit for csv conversion should be executed separately. 
 Could you use fal package to place python script into pre-hooks: https://github.com/fal-ai/fal
   - sh runner script to make presentation easier? Containerize development environment?
-  - deploy dbt docs as static site in cloud bucket for nice presentation of the whole graph  
+  - deploy dbt docs as static site in cloud bucket for nice presentation of the whole graph.
+    
+    :heavy_check_mark: **Try this**: http://where-is-carmen-dbt-docs.s3-website-ap-southeast-2.amazonaws.com/index.html#!/overview
     
 ![lineage_graph.png](docs/lineage_graph.png)
 
