@@ -15,6 +15,7 @@ For simplicity, I assume they are different persons
 - Date dimension is not implemented as it's not required for requested analytics
 - I had a doubts where to put `city_agent` field but at the end decided to add it to `person` table as it is an attribute 
   of agent
+- Editable version of diagram is available in `docs/ERD` folder (drawio format)
 
 ![img.png](docs/ERD/carmen-db-erd.png)
 
@@ -50,6 +51,12 @@ standard functionality of dbt - `dbt seed`. Then I created one staging view `stg
     complex and less repeatable in other databases
   - using one staging view makes process simpler and it allows to test/validate the whole dataset before we start loading data to 
     the next schema
+- Indexes are not created intentionally, as size of tables is very small
+- Further possible improvements: 
+  - currently python scrit for csv conversion should be executed separately. 
+Could you use fal package to place python script into pre-hooks: https://github.com/fal-ai/fal
+  - sh runner script to make presentation easier? Containerize development environment?
+  - deploy dbt docs as static site in cloud bucket for nice presentation of the whole graph  
     
 ![lineage_graph.png](docs/lineage_graph.png)
 
