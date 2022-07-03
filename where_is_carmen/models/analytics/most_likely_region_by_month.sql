@@ -27,7 +27,7 @@ cte_ranked AS (
            vis.region,
            ROUND(CAST(vis.region_visits_num AS NUMERIC) /
                  CAST(tot_vis.total_visits AS NUMERIC), 2) AS region_visit_perc,
-           ROW_NUMBER() OVER (
+           RANK() OVER (
                PARTITION BY vis.month_witnessed ORDER BY CAST(vis.region_visits_num AS NUMERIC) /
                                                          CAST(tot_vis.total_visits AS NUMERIC) DESC
                )  AS rn

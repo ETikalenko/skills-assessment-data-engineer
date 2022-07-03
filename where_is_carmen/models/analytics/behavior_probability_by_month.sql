@@ -2,11 +2,12 @@
 WITH cte_probability AS (
     SELECT EXTRACT(MONTH FROM date_witnessed) AS month_witnessed,
            ROUND(
-                       CAST(SUM(CASE
-                                    WHEN behavior IN (SELECT behavior from {{ ref("most_occuring_behavior") }}) THEN 1
-                                    ELSE 0
-                           END) AS NUMERIC) / CAST(COUNT(date_witnessed) AS NUMERIC), 2
-               )                              AS probability
+               CAST(SUM(CASE
+                            WHEN behavior IN (SELECT behavior from {{ ref("most_occuring_behavior") }}) THEN 1
+                            ELSE 0
+                        END
+               ) AS NUMERIC) / CAST(COUNT(date_witnessed) AS NUMERIC), 2
+           ) AS probability
     FROM {{ ref("event_sighting") }}
     GROUP BY month_witnessed
 )

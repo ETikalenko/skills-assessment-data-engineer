@@ -20,7 +20,7 @@ For simplicity, I assume they are different persons
 
 
 ### Local installation
-- Install python >= 3.8
+- Install python >= 3.8, create virtual environment outside of repository and activate it in terminal
 - Install requirements: `pip install -r requirements.txt`
 - Install Docker for your OS: https://docs.docker.com/get-docker/
 - Run Postgres in a container: `docker run --name carmen-db-container -e POSTGRES_USER=your_username -e POSTGRES_PASSWORD=your_password -p 5432:5432`
@@ -33,8 +33,10 @@ For simplicity, I assume they are different persons
     POSTGRES_PASSWORD=<your_password>
 ```
 - dbt project is located in `where_is_carmen` folder. Sub-folder `profiles` contains example file for profiles.yml.
-  If you use Postgres, copy this file into `~/.dbt/` and rename to `profiles.yml`: https://docs.getdbt.com/dbt-cli/configure-your-profile#advanced-customizing-a-profile-directory
-  Change local folder to project folder `where_is_carmen` and run `dbt_deps` to install dbt packages
+  
+    If you use Postgres, copy this file into `~/.dbt/` and rename to `profiles.yml`: https://docs.getdbt.com/dbt-cli/configure-your-profile#advanced-customizing-a-profile-directory.
+  
+  Change folder in terminal to project folder `where_is_carmen` (`cd where_is_carmen`) and run `dbt_deps` to install dbt packages
 - Execute `dbt seed`, `dbt run` and then `dbt test` to run and test the whole pipeline 
 
 
@@ -71,7 +73,7 @@ standard functionality of dbt - `dbt seed`. Then I created one staging view `stg
 
 
 3. Q: What are the three most occuring behaviors of Ms. Sandiego?   
-   Not clear what to do if we have a tie on third place. I take first in alphabetical order (but for real tasks I would 
+   Not clear what to do if we have a tie in third place. I take first in alphabetical order (but for real tasks I would 
    prefer to use rank function to have all rows)
    
     A: Three most likely behaviors: Out-of-control, Complaining, Happy
