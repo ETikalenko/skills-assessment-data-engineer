@@ -6,8 +6,8 @@ Task description can be found [here](docs/README.md)
 - Agents with the same name but different HQ: are they the same persons who were relocated or they are all different persons?
 For simplicity, I assume they are different persons
 - Assume that agent works only in one region and can report only to this region HQ
-- Not clear what we'll have in data and how to process cases records if, for example, two witnesses saw same Carmen appearance 
-  at the same day independently. What if they saw different appearance the same day? From data for simplicity assume that 
+- Not clear what we'll have in data and how to process cases if, for example, two witnesses saw same Carmen 
+  at the same day independently. What if they saw different appearances the same day? From data for simplicity assume that 
   not more than one event happens on specified date 
 
 ### ERD Diagram
@@ -45,7 +45,7 @@ For simplicity, I assume they are different persons
 - Python script `./utils/convert_xlsx_to_csv.py` is developed to convert Excel file into CSV. I added new column region
   which is populated by sheet name
 - Description of second step mentions creating of eight view models on top of csv files. I decided to upload files using 
-standard functionality of dbt - `dbt seed`. Then I created one staging view `stg_carmen_sightings`. The reasons of such desicion:
+standard functionality of dbt - `dbt seed`. Then I created one staging view `stg_carmen_sightings`. The reasons of such decision:
   - although dbt is tool for transformation and it is not supposed to do regular file loads in database, it could be used for one time load
   - probably I could use `COPY FROM` statement or create external table in macro to load CSVs but it makes the process more 
     complex and less repeatable in other databases
@@ -53,8 +53,8 @@ standard functionality of dbt - `dbt seed`. Then I created one staging view `stg
     the next schema
 - Indexes are not created intentionally, as size of tables is very small
 - Further possible improvements: 
-  - currently python scrit for csv conversion should be executed separately. 
-Could you use fal package to place python script into pre-hooks: https://github.com/fal-ai/fal
+  - currently python script for csv conversion should be executed separately. 
+Could use fal package to place python script into pre-hooks: https://github.com/fal-ai/fal
   - sh runner script to make presentation easier? Containerize development environment?
   - deploy dbt docs as static site in cloud bucket for nice presentation of the whole graph.
     
